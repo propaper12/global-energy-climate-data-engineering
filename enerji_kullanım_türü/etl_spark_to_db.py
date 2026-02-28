@@ -27,15 +27,15 @@ def run_dynamic_etl():
         objects = minio_client.list_objects("raw-data", prefix="bronze/", recursive=True)
         csv_files = [obj.object_name for obj in objects if obj.object_name.endswith('.csv')]
     except Exception as e:
-        logger.error(f"❌ MinIO bağlantı hatası: {e}")
+        logger.error(f" MinIO bağlantı hatası: {e}")
         return
 
     if not csv_files:
-        logger.warning("⚠️ Bronze klasöründe işlenecek CSV bulunamadı. Lütfen Ingest işlemini çalıştırın.")
+        logger.warning(" Bronze klasöründe işlenecek CSV bulunamadı. Lütfen Ingest işlemini çalıştırın.")
         return
 
     spark = get_spark_session()
-    logger.info(f"📦 MinIO'da {len(csv_files)} adet dosya bulundu. İşlem başlıyor...")
+    logger.info(f" MinIO'da {len(csv_files)} adet dosya bulundu. İşlem başlıyor...")
 
     # 2. Bulunan her bir dosyayı sırayla işle
     for file_path in csv_files:
@@ -47,9 +47,9 @@ def run_dynamic_etl():
         
         try:
             df = spark.read.option("header", "true").option("inferSchema", "true").csv(bronze_s3_path)
-            logger.info(f"📥 Okundu: {base_name}.csv")
+            logger.info(f" Okundu: {base_name}.csv")
         except Exception as e:
-            logger.error(f"❌ Spark okuma hatası ({bronze_s3_path}): {e}")
+            logger.error(f" Spark okuma hatası ({bronze_s3_path}): {e}")
             continue
 
         # Kolon isimlerindeki boşluk ve parantezleri temizle (Parquet ve Postgres kuralları)
@@ -60,7 +60,7 @@ def run_dynamic_etl():
         # 3. SILVER'A YAZ (Parquet formatında)
         silver_path = f"s3a://raw-data/silver/{table_name}.parquet"
         df.write.mode("overwrite").parquet(silver_path) 
-        logger.info(f"🥈 Silver (Parquet) Yazıldı: {table_name}.parquet")
+        logger.info(f" Silver (Parquet) Yazıldı: {table_name}.parquet")
 
         # 4. GOLD'A YAZ (Postgres) - Her CSV kendi adıyla tablo olur
         df.write \
@@ -73,10 +73,11 @@ def run_dynamic_etl():
             .mode("overwrite") \
             .save() 
         
-        logger.info(f"🏆 Gold (Postgres) Güncellendi: Tablo Adı -> {table_name}")
+        logger.info(f" Gold (Postgres) Güncellendi: Tablo Adı -> {table_name}")
 
     spark.stop()
-    logger.info("🎉 Tüm veriler başarıyla işlendi ve veri ambarına aktarıldı!")
+    logger.info("Tüm veriler başarıyla işlendi ve veri ambarına aktarıldı!")
 
 if __name__ == "__main__":
+
     run_dynamic_etl()
