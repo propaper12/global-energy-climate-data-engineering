@@ -22,7 +22,7 @@ def run_static_etl():
         "energy_share": "share-electricity-renewables"
     }
 
-    logger.info("🚀 Sabit Boru Hattı Başlatıldı: bronze/latest -> silver/latest -> Gold")
+    logger.info(": bronze/latest -> silver/latest -> Gold")
 
     for table_name, file_name in datasets.items():
         # 1. BRONZE'DAN OKU (SABİT YOL)
@@ -30,9 +30,9 @@ def run_static_etl():
         
         try:
             df = spark.read.option("header", "true").option("inferSchema", "true").csv(bronze_path)
-            logger.info(f"📥 Bronze okundu: {bronze_path}")
+            logger.info(f"Bronze okundu: {bronze_path}")
         except Exception as e:
-            logger.error(f"❌ HATA: {bronze_path} bulunamadı! Ingest scriptini kontrol et.")
+            logger.error(f"HATA: {bronze_path} bulunamadı! Ingest scriptini kontrol et.")
             continue
 
         # 2. SILVER'A YAZ (SABİT YOL - PARQUET)
@@ -41,7 +41,7 @@ def run_static_etl():
         
         silver_path = f"s3a://raw-data/silver/latest/{table_name}.parquet"
         df.write.mode("overwrite").parquet(silver_path)
-        logger.info(f"🥈 Silver güncellendi: {silver_path}")
+        logger.info(f"Silver güncellendi: {silver_path}")
 
         # 3. GOLD'A YAZ (Postgres)
         df.write \
@@ -54,9 +54,10 @@ def run_static_etl():
             .mode("overwrite") \
             .save()
         
-        logger.info(f"🏆 Gold (Postgres) güncellendi: {table_name}")
+        logger.info(f"Gold (Postgres) güncellendi: {table_name}")
 
     spark.stop()
 
 if __name__ == "__main__":
+
     run_static_etl()
