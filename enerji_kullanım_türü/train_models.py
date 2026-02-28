@@ -20,10 +20,10 @@ def train_and_save_models(target_country=None):
     df_co2, df_fossil, df_share, df_master = load_all_datasets()
     
     if df_master is None or df_master.empty:
-        logger.error("❌ HATA: Veritabanı boş.")
+        logger.error("HATA: Veritabanı boş.")
         return
 
-    # 1. POLİTİKA SİMÜLATÖRÜ MODELİ (Hızlı olduğu için her seferinde güncellenir)
+    # 1. POLİTİKA SİMÜLATÖRÜ MODELİ
     df_sim = df_master.copy()
     df_sim['Share_Fossil'] = (df_sim['Fossil fuels'] / df_sim['Total_Gen']) * 100
     df_sim['Share_Nuclear'] = (df_sim['Nuclear'] / df_sim['Total_Gen']) * 100
@@ -34,7 +34,7 @@ def train_and_save_models(target_country=None):
         rf_sim_model = RandomForestRegressor(n_estimators=100, random_state=42)
         rf_sim_model.fit(df_sim[['Share_Renewables', 'Share_Nuclear', 'Share_Fossil']], df_sim['Per capita emissions'])
         joblib.dump(rf_sim_model, "models/policy_simulator_rf.pkl")
-        logger.info("✅ Global Simülatör Modeli güncellendi.")
+        logger.info(" Global Simülatör Modeli güncellendi.")
 
     # 2. ÜLKE BAZLI MODELLER (PARAMETREYE GÖRE FİLTRELEME)
     df_ai = df_master.dropna(subset=['Renewables', 'Year', 'Fossil fuels', 'Nuclear', 'Per capita emissions'])
@@ -42,10 +42,10 @@ def train_and_save_models(target_country=None):
     # Eğer bir ülke seçildiyse sadece onu eğit, yoksa hepsini (target_country kontrolü)
     if target_country:
         entities = [target_country]
-        logger.info(f"🎯 Hedef odaklı eğitim: {target_country}")
+        logger.info(f"Hedef odaklı eğitim: {target_country}")
     else:
         entities = df_ai['Entity'].unique()
-        logger.info("🌍 Toplu eğitim başlatılıyor (Tüm Ülkeler).")
+        logger.info(" Toplu eğitim başlatılıyor (Tüm Ülkeler).")
 
     success_count = 0
     for country in entities:
@@ -82,11 +82,12 @@ def train_and_save_models(target_country=None):
             }
             joblib.dump(model_package, f"models/ai_vision_{country}.pkl")
             success_count += 1
-            logger.info(f"   ✅ {country} modeli hazır.")
+            logger.info(f"{country} modeli hazır.")
             
-    logger.info(f"🎉 İşlem Tamam: {success_count} model dosyası güncellendi.")
+    logger.info(f" İşlem Tamam: {success_count} model dosyası güncellendi.")
 
 if __name__ == "__main__":
     # Dışarıdan argüman gelip gelmediğini kontrol et (sys.argv)
     argument_country = sys.argv[1] if len(sys.argv) > 1 else None
+
     train_and_save_models(argument_country)
