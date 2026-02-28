@@ -33,7 +33,7 @@ def fix_columns(df):
     
     df = df.rename(columns=rename_map)
 
-    # 🛡️ ŞEMA DAYATMASI
+    #  ŞEMA 
     beklenen_kolonlar = ['Entity', 'Year', 'Fossil fuels', 'Renewables', 'Per capita emissions', 'Nuclear']
     for kolon in beklenen_kolonlar:
         if kolon not in df.columns:
@@ -41,7 +41,7 @@ def fix_columns(df):
             elif kolon == 'Year': df[kolon] = 2024
             else: df[kolon] = 0.0
 
-    # 🤖 FEATURE ENGINEERING
+    # FEATURE ENGINEERING
     if 'Total_Gen' not in df.columns:
         df['Total_Gen'] = df['Fossil fuels'] + df['Renewables'] + df['Nuclear']
         df.loc[df['Total_Gen'] == 0, 'Total_Gen'] = 1.0 
@@ -89,7 +89,7 @@ def load_all_datasets():
             elif 'share' in tablo and df_share is None:
                 df_share = df
 
-        # 🥇 GOLDEN RECORD: Master Tablo Yaratımı (df_supp)
+        #  GOLDEN RECORD: Master Tablo Yaratımı (df_supp)
         if df_fossil is not None and not df_fossil.empty:
             df_supp = df_fossil.copy()
         else:
@@ -104,7 +104,7 @@ def load_all_datasets():
             co2_subset = df_co2[['Entity', 'Year', 'Per capita emissions']]
             df_supp = pd.merge(df_supp, co2_subset, on=['Entity', 'Year'], how='left')
         
-        # 🛡️ MUTLAK ZIRH (Gümrük Kontrolü): Ne olursa olsun bu kolonlar df_supp içinde OLACAK!
+        # MUTLAK ZIRH (Gümrük Kontrolü): Ne olursa olsun bu kolonlar df_supp içinde OLACAK!
         # 6. Sayfa (Veri Keşfi) bu 4 kolonu arıyor, yoksalar anında yaratıyoruz.
         eksik_olmamasi_gerekenler = ['Per capita emissions', 'Share_Fossil', 'Share_Nuclear', 'Share_Renewables']
         for kol in eksik_olmamasi_gerekenler:
@@ -133,7 +133,7 @@ def load_all_datasets():
     except Exception as e:
         logger.error(f"HATA: Dinamik okuma sırasında patladı! {e}")
         try:
-            st.error(f"⚠️ Veritabanından veri çekilemedi! Detay: {e}")
+            st.error(f"Veritabanından veri çekilemedi! Detay: {e}")
             st.stop()
         except:
             print(f"Veritabanından veri çekilemedi: {e}")
@@ -155,7 +155,7 @@ def setup_sidebar():
              st.stop()
 
         entities = sorted(df_referans['Entity'].dropna().unique())
-        st.sidebar.title("💎 GECI Energy Executive")
+        st.sidebar.title(" GECI Energy Executive")
         st.sidebar.markdown("---")
         
         default_country = st.session_state.get("selected_country", "Turkey")
@@ -163,7 +163,7 @@ def setup_sidebar():
             default_country = entities[0] if entities else "Turkey"
             
         selected_country = st.sidebar.selectbox(
-            "📍 Analiz Bölgesi Seçin", 
+            " Analiz Bölgesi Seçin", 
             entities, 
             index=entities.index(default_country)
         )
@@ -207,4 +207,5 @@ def fetch_hybrid_data(lat, lon):
         'live_wind': 4.8, 
         'live_solar_factor': 0.82, 
         'source': "NASA-POWER-FUSION-V1"
+
     }
