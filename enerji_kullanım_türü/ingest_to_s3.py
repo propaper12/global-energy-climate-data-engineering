@@ -3,7 +3,7 @@ from minio import Minio
 from config import MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_ENDPOINT, logger
 
 def run_ingestion():
-    logger.info("📥 Veri Çekme (Ingest) İşlemi Başladı...")
+    logger.info("📥Veri Çekme (Ingest) İşlemi Başladı...")
     
     # MinIO'ya bağlan
     client = Minio(
@@ -17,22 +17,22 @@ def run_ingestion():
     if not client.bucket_exists("raw-data"):
         client.make_bucket("raw-data")
 
-    # 🎯 HEDEF KLASÖR: Senin verilerin olduğu klasör
+    # HEDEF KLASÖR: verilerin olduğu klasör
     data_folder = "Veri_Setleri"
     
     # Klasör gerçekten orada mı kontrol et
     if not os.path.exists(data_folder):
-        logger.error(f"❌ '{data_folder}' klasörü konteyner içinde bulunamadı! Docker ayarlarını kontrol et.")
+        logger.error(f" '{data_folder}' klasörü konteyner içinde bulunamadı! Docker ayarlarını kontrol et.")
         return
 
     # Veri_Setleri klasörünün içindeki TÜM CSV dosyalarını bul
     csv_files = [f for f in os.listdir(data_folder) if f.endswith('.csv')]
     
     if not csv_files:
-        logger.error(f"❌ '{data_folder}' klasörünün içinde hiç .csv dosyası bulunamadı!")
+        logger.error(f"'{data_folder}' klasörünün içinde hiç .csv dosyası bulunamadı!")
         return
 
-    logger.info(f"🔍 Toplam {len(csv_files)} adet CSV dosyası bulundu. MinIO'ya aktarılıyor...")
+    logger.info(f"Toplam {len(csv_files)} adet CSV dosyası bulundu. MinIO'ya aktarılıyor...")
 
     # Her bir dosyayı MinIO'ya yükle
     for file_name in csv_files:
@@ -45,11 +45,12 @@ def run_ingestion():
         try:
             # fput_object yerel dosyayı MinIO'ya yükler
             client.fput_object("raw-data", minio_path, local_file_path)
-            logger.info(f"✅ Başarılı: {file_name} -> {minio_path}")
+            logger.info(f" Başarılı: {file_name} -> {minio_path}")
         except Exception as e:
-            logger.error(f"❌ Hata ({file_name}): {e}")
+            logger.error(f" Hata ({file_name}): {e}")
 
-    logger.info("🎉 Tüm veriler Bronze katmanına başarıyla yüklendi!")
+    logger.info("Tüm veriler Bronze katmanına başarıyla yüklendi!")
 
 if __name__ == "__main__":
+
     run_ingestion()
